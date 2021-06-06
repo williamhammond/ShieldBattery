@@ -8,5 +8,7 @@ export function getLoggerOptions() {
     level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
     genReqId: cuid,
     serializers: stdSerializers,
+    prettyPrint: { colorize: true },
+    translateTime: true,
   }
 }
