@@ -1,5 +1,5 @@
 import fs, { promises as fsPromises } from 'fs'
-import { net } from 'electron'
+import got from 'got'
 import { Map } from 'immutable'
 import { mkdirp } from 'mkdirp'
 import path from 'path'
@@ -74,20 +74,7 @@ export class MapStore {
 
       await mkdirp(path.dirname(mapPath))
       log.verbose(`Downloading map from ${mapUrl} to ${mapPath}`)
-      const request = net.request(mapUrl)
-      await new Promise((resolve, reject) => {
-        request.on('response', (response) => {
-          if (response.statusCode === 200) {
-            response.pipe(fs.createWriteStream(mapPath))
-            response.on('end', resolve)
-            response.on('error', reject)
-          } else {
-            reject(new Error('Request failed with status code: ' + response.statusCode))
-          }
-        })
-        request.on('error', reject)
-        request.end()
-      })
+      await pipeline(got.stream(mapUrl), fs.createWriteStream(mapPath))
       return true
     } catch (err) {
       log.error(`Error checking/downloading map: ${(err as any).stack ?? err}`)
